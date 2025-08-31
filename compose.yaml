@@ -1,0 +1,40 @@
+services:
+  sandyapp:
+    container_name: sandybox
+    build: .
+    image: sbox:v1.0
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    ports:
+      - 5000:5000
+    volumes:
+      - ./src:/src
+    restart: unless-stopped
+    networks:
+      - sandynet
+    depends_on:
+      - sandydb
+
+  sandydb:
+    container_name: sandydb
+    image: mariadb:latest
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    env_file: .secrets
+    volumes:
+      - ./dbdata:/var/lib/mysql
+    networks:
+      - sandynet
+    restart: unless-stopped
+
+networks:
+  pynet:
+    name: sandynet
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.45.0.0/24
